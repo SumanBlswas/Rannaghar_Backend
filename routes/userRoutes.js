@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { validator } from "../middlewares/validator.js";
 import { userModel } from "../model/userModel.js";
+import { checker } from "../middlewares/checker.js";
 
 const userRouter = express.Router();
 
@@ -47,14 +48,13 @@ userRouter.post("/login", async (req, res) => {
 userRouter.use(validator);
 
 userRouter.post("/register", async (req, res) => {
-  const { name, email, password, department } = req.body;
+  const { name, email, password } = req.body;
   try {
     bcrypt.hash(password, 5, async (err, hash) => {
       let user = new userModel({
         name,
         email,
         password: hash,
-        department,
       });
       await user.save();
       res.status(200).send({ msg: "New user has been added" });
@@ -85,7 +85,6 @@ userRouter.delete("/delete/:userID", async (req, res) => {
   }
 });
 
-//for filtering the data
 userRouter.get("/query", async (req, res) => {
   const { name, email, department } = req.query;
   try {
@@ -103,6 +102,18 @@ userRouter.get("/query", async (req, res) => {
     res.status(200).send(user);
   } catch (error) {
     res.status(404).send({ msg: error.meassage });
+  }
+});
+
+userRouter.use(checker);
+
+userRouter.get("/account", async (req, res) => {
+  const { userID } = req.body;
+  try {
+    const users = await userModel.findOne({ _id: userID });
+    res.status(200).send(users);
+  } catch (error) {
+    res.status(404).send({ msg: error.message });
   }
 });
 

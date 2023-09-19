@@ -5,6 +5,8 @@ dotenv.config();
 import cors from "cors";
 import { connection } from "./config/db.js";
 import { userRouter } from "./routes/userRoutes.js";
+import { checker } from "./middlewares/checker.js";
+import { favRouter } from "./routes/favRoutes.js";
 
 const app = express();
 app.use(express.json());
@@ -20,6 +22,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/users", userRouter);
+app.use(checker);
+app.use("/fav-recipe", favRouter);
 
 app.listen(process.env.PORT_LINK, async () => {
   try {
